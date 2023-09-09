@@ -43,21 +43,24 @@ static int	_atoi(char *str)
 
 int	init_info(char **av, t_info *info)
 {
-	info->num_of_fork = _atoi(av[1]);
-	if (info->num_of_fork < 0)
-		return (-1);
-	info->time_to_die = _atoi(av[2]);
-	if (info->time_to_die < 0)
-		return (-1);
-	info->time_to_eat = _atoi(av[3]);
-	if (info->time_to_eat < 0)
-		return (-1);
-	info->time_to_sleep = _atoi(av[4]);
-	if (info->time_to_sleep < 0)
-		return (-1);
-	info->num_of_must_eat = _atoi(av[5]);
-	if (info->num_of_must_eat < 0)
-		return (-1);
-	pthread_mutex_init(&info->mutex, NULL);
+	int	i;
+
+	i = 0;
+	while (i < 5)
+	{
+		info->args[i] = _atoi(av[i + 1]);
+		if (info->args[i] < 0)
+			return (-1);
+		i++;
+	}
+	if (info->args[0] == 1)
+		return (invaild_arg_err());
+	info->fork = malloc(sizeof(int) * (info->args[0] + 1));
+	if (!info->fork)
+		return(malloc_err(NULL) - EXIT_FAILURE - 1);
+	info->cnt = 0;
+	gettimeofday(&info->start_time, NULL);
+	pthread_mutex_init(&info->state_mutex, NULL);
+	pthread_mutex_init(&info->cnt_mutex, NULL);
 	return (0);
 }

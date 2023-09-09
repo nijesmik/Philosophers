@@ -7,10 +7,13 @@ BONUS_NAME = philo_bonus
 INCLUDES = ./includes/
 HEADER = $(INCLUDES)philosophers.h
 
-SRCS_DIR = ./srcs/mandatory/
+SRCS_DIR = ./srcs/
 SRCS = \
 	$(SRCS_DIR)main.c			\
 	$(SRCS_DIR)init.c			\
+	$(SRCS_DIR)util.c			\
+	$(SRCS_DIR)error.c			\
+	$(SRCS_DIR)check.c			\
 	$(SRCS_DIR)simulation.c
 OBJS = $(SRCS:.c=.o)
 
@@ -24,7 +27,7 @@ all : $(NAME)
 $(NAME) : $(OBJS)
 	$(CC) $(CFLAGS) -I$(INCLUDES) $^ -o $(NAME)
 
-bonus : $(BONUS_NAME)
+# bonus : $(BONUS_NAME)
 
 $(BONUS_NAME) : $(BONUS_OBJS)
 	$(CC) $(CFLAGS) -I$(INCLUDES) $^ -o $(BONUS_NAME)
@@ -43,4 +46,4 @@ re :
 	make fclean 
 	make all
 
-.PHONY : all clean fclean re
+.PHONY : all clean fclean re # bonus
