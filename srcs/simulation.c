@@ -18,7 +18,7 @@ void	sleep_after_eat(t_philo *p, t_info *info)
 	p->eat_cnt++;
 	pthread_mutex_lock(&info->cnt_mutex);
 	if (p->eat_cnt == info->args[4])
-		info->cnt++;
+		info->fin_philo_cnt++;
 	pthread_mutex_unlock(&info->cnt_mutex);
 	spend_time(p->last_eat, info->args[2]);
 	gettimeofday(&p->last_sleep, NULL);
@@ -28,7 +28,7 @@ void	sleep_after_eat(t_philo *p, t_info *info)
 	info->fork[p->idx] = -1;
 	info->fork[p->next_idx] = -1;
 	print_state(info, p->idx, "put down the forks");
-	check_next_philosopher(p, info);
+	test_next_philosopher(p, info);
 	pthread_mutex_unlock(&info->state_mutex);
 }
 
@@ -47,7 +47,7 @@ int	is_finish(t_info *info)
 
 	result = 0;
 	pthread_mutex_lock(&info->cnt_mutex);
-	if (info->cnt == info->args[0])
+	if (info->fin_philo_cnt == info->args[0])
 		result = 1;
 	pthread_mutex_unlock(&info->cnt_mutex);
 	return (result);
@@ -63,10 +63,10 @@ void	*simulation(void *arg)
 		usleep(100 * p->info->args[0]);
 	while (1)
 	{
-		if (check_fork(p, p->info) < 0)
+		if (test_fork(p, p->info) < 0)
 		{
 			pthread_mutex_lock(&p->info->cnt_mutex);
-			p->info->cnt++;
+			p->info->fin_philo_cnt = p->info->args[0];
 			pthread_mutex_unlock(&p->info->cnt_mutex);
 			return (NULL);
 		}

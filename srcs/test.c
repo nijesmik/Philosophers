@@ -58,7 +58,7 @@ int	check_state(t_philo *p, t_info *info)
 	return (result);
 }
 
-int	check_fork(t_philo *p, t_info *info)
+int	test_fork(t_philo *p, t_info *info)
 {
 	int	result;
 	int	remain_time;
@@ -81,7 +81,7 @@ int	check_fork(t_philo *p, t_info *info)
 	return (1);
 }
 
-void	check_next_philosopher(t_philo *p, t_info *info)
+void	test_next_philosopher(t_philo *p, t_info *info)
 {	
 	t_philo *left;
 	t_philo *right;

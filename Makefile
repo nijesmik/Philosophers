@@ -13,7 +13,7 @@ SRCS = \
 	$(SRCS_DIR)init.c			\
 	$(SRCS_DIR)util.c			\
 	$(SRCS_DIR)error.c			\
-	$(SRCS_DIR)check.c			\
+	$(SRCS_DIR)test.c			\
 	$(SRCS_DIR)simulation.c
 OBJS = $(SRCS:.c=.o)
 

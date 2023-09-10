@@ -58,7 +58,7 @@ int	init_info(char **av, t_info *info)
 	info->fork = malloc(sizeof(int) * (info->args[0] + 1));
 	if (!info->fork)
 		return(malloc_err(NULL) - EXIT_FAILURE - 1);
-	info->cnt = 0;
+	info->fin_philo_cnt = 0;
 	gettimeofday(&info->start_time, NULL);
 	pthread_mutex_init(&info->state_mutex, NULL);
 	pthread_mutex_init(&info->cnt_mutex, NULL);

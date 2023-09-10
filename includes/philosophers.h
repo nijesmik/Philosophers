@@ -20,7 +20,7 @@ typedef struct s_info
 {
 	int				args[5];
 	int				*fork;
-	int				cnt;
+	int				fin_philo_cnt;
 	struct timeval	start_time;
 	pthread_mutex_t	state_mutex;
 	pthread_mutex_t	cnt_mutex;
@@ -52,9 +52,9 @@ int		init_info(char **av, t_info *info);
 /* simulation.c */
 void	*simulation(void *arg);
 
-/* check.c */
-int		check_fork(t_philo *philo, t_info *info);
-void	check_next_philosopher(t_philo *p, t_info *info);
+/* test.c */
+int		test_fork(t_philo *philo, t_info *info);
+void	test_next_philosopher(t_philo *p, t_info *info);
 
 /* util.c */
 int		get_time(struct timeval start_time);

@@ -13,5 +13,6 @@ int	get_time(struct timeval start_time)
 
 void	print_state(t_info *info, int idx, char *str)
 {
-	printf("%d %d %s\n", get_time(info->start_time), idx + 1, str);
+	if (info->fin_philo_cnt != info->args[0])
+		printf("%d %d %s\n", get_time(info->start_time), idx + 1, str);
 }
