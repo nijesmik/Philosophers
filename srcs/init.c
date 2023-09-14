@@ -51,16 +51,14 @@ int	init_info(char **av, t_info *info)
 		info->args[i] = _atoi(av[i + 1]);
 		if (info->args[i] < 0)
 			return (-1);
+		else if (!info->args[i])
+			return (invaild_arg_err());
 		i++;
 	}
-	if (info->args[0] == 1)
-		return (invaild_arg_err());
-	info->fork = malloc(sizeof(int) * (info->args[0] + 1));
+	info->fork = malloc(sizeof(pthread_mutex_t) * info->args[0]);
 	if (!info->fork)
-		return(malloc_err(NULL) - EXIT_FAILURE - 1);
-	info->fin_philo_cnt = 0;
-	gettimeofday(&info->start_time, NULL);
-	pthread_mutex_init(&info->state_mutex, NULL);
-	pthread_mutex_init(&info->cnt_mutex, NULL);
+		return(malloc_err(NULL, NULL));
+	info->fin = 0;
+	pthread_mutex_init(&info->fin_mutex, NULL);
 	return (0);
 }

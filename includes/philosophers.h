@@ -19,50 +19,34 @@ args[4] = number_of_times_each_philosopher_must_eat
 typedef struct s_info
 {
 	int				args[5];
-	int				*fork;
-	int				fin_philo_cnt;
+	int				fin;
 	struct timeval	start_time;
-	pthread_mutex_t	state_mutex;
-	pthread_mutex_t	cnt_mutex;
-	t_philo			*philosophers;
+	pthread_mutex_t	*fork;
+	pthread_mutex_t	fin_mutex;
 }	t_info;
-
-typedef enum e_state {
-	THINK,
-	EAT,
-	SLEEP,
-	DIE,
-}	t_state;
 
 typedef struct s_philosopher
 {
 	int		idx;
-	int		prev_idx;
 	int		next_idx;
 	int		eat_cnt;
 	t_info	*info;
-	t_state	state;
 	struct timeval	last_eat;
-	struct timeval	last_sleep;
 }	t_philo;
 
 /* init.c */
 int		init_info(char **av, t_info *info);
 
-/* simulation.c */
-void	*simulation(void *arg);
-
-/* test.c */
-int		test_fork(t_philo *philo, t_info *info);
-void	test_next_philosopher(t_philo *p, t_info *info);
+/* dining.c */
+void	*dining(void *arg);
 
 /* util.c */
 int		get_time(struct timeval start_time);
-void	print_state(t_info *info, int idx, char *str);
+int		print_state(t_info *info, t_philo *p, char *str);
 
 /* error.c */
 int		arg_num_err(void);
-int		malloc_err(t_philo *philo);
+int 	malloc_err(t_info *info, pthread_t *threads);
 int		invaild_arg_err(void);
 
 #endif

@@ -11,8 +11,24 @@ int	get_time(struct timeval start_time)
 	return (time);
 }
 
-void	print_state(t_info *info, int idx, char *str)
+int	print_state(t_info *info, t_philo *p, char *str)
 {
-	if (info->fin_philo_cnt != info->args[0])
-		printf("%d %d %s\n", get_time(info->start_time), idx + 1, str);
+	char	*msg;
+	int		result;
+
+	msg = str;
+	result = 0;
+	pthread_mutex_lock(&p->info->fin_mutex);
+	if (info->fin != info->args[0])
+	{
+		if (get_time(p->last_eat) > info->args[1])
+		{
+			msg = "died";
+			result = -1;
+			info->fin = info->args[0];
+		}
+		printf("%d %d %s\n", get_time(info->start_time), p->idx + 1, msg);
+	}
+	pthread_mutex_unlock(&p->info->fin_mutex);
+	return (result);
 }

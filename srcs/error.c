@@ -6,16 +6,18 @@ int	arg_num_err(void)
 	return (EXIT_FAILURE);
 }
 
-int malloc_err(t_philo *philo)
+int malloc_err(t_info *info, pthread_t *threads)
 {
-	if (philo)
-		free(philo);
+	if (info->fork)
+		free(info->fork);
+	if (threads)
+		free(threads);
 	write(2, "memory allocation error\n", 24);
-	return (EXIT_FAILURE);
+	return (-1);
 }
 
 int	invaild_arg_err(void)
 {
-	write(2, "error : 1 is invalid number of philosophers\n", 44);
+	write(2, "error : 0 is invalid argument\n", 44);
 	return (-1);
 }

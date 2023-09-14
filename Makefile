@@ -13,8 +13,7 @@ SRCS = \
 	$(SRCS_DIR)init.c			\
 	$(SRCS_DIR)util.c			\
 	$(SRCS_DIR)error.c			\
-	$(SRCS_DIR)test.c			\
-	$(SRCS_DIR)simulation.c
+	$(SRCS_DIR)dining.c
 OBJS = $(SRCS:.c=.o)
 
 BONUS_SRCS_DIR = ./srcs/bonus/
