@@ -32,3 +32,16 @@ int	print_state(t_info *info, t_philo *p, char *str)
 	pthread_mutex_unlock(&p->info->fin_mutex);
 	return (result);
 }
+
+void	clear(t_info *info, t_malloc *m)
+{
+	int	i;
+
+	i = info->args[0];
+	while (i-- > 0)
+		pthread_mutex_destroy(&info->fork[i]);
+	pthread_mutex_destroy(&info->fin_mutex);
+	free(info->fork);
+	free(m->threads);
+	free(m->philosophers);
+}

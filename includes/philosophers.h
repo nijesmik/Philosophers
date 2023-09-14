@@ -7,14 +7,12 @@
 # include <unistd.h>
 # include <sys/time.h>
 
-typedef struct s_philosopher	t_philo;
-
-/*
-args[0] = number_of_philosophers 
-args[1] = time_to_die 
-args[2] = time_to_eat
-args[3] = time_to_sleep
-args[4] = number_of_times_each_philosopher_must_eat
+/**
+* args[0] = number_of_philosophers 
+* args[1] = time_to_die 
+* args[2] = time_to_eat
+* args[3] = time_to_sleep
+* args[4] = number_of_times_each_philosopher_must_eat
 */
 typedef struct s_info
 {
@@ -27,26 +25,28 @@ typedef struct s_info
 
 typedef struct s_philosopher
 {
-	int		idx;
-	int		next_idx;
-	int		eat_cnt;
-	t_info	*info;
+	int				idx;
+	int				next_idx;
+	int				eat_cnt;
+	t_info			*info;
 	struct timeval	last_eat;
 }	t_philo;
 
+typedef struct s_malloc
+{
+	pthread_t	*threads;
+	t_philo		*philosophers;	
+}	t_malloc;
+
 /* init.c */
-int		init_info(char **av, t_info *info);
+int		init(char **av, t_info *info, t_malloc *m);
 
 /* dining.c */
-void	*dining(void *arg);
+void	dining(t_info *info, t_malloc *m);
 
 /* util.c */
 int		get_time(struct timeval start_time);
 int		print_state(t_info *info, t_philo *p, char *str);
-
-/* error.c */
-int		arg_num_err(void);
-int 	malloc_err(t_info *info, pthread_t *threads);
-int		invaild_arg_err(void);
+void	clear(t_info *info, t_malloc *m);
 
 #endif

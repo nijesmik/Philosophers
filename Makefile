@@ -12,7 +12,6 @@ SRCS = \
 	$(SRCS_DIR)main.c			\
 	$(SRCS_DIR)init.c			\
 	$(SRCS_DIR)util.c			\
-	$(SRCS_DIR)error.c			\
 	$(SRCS_DIR)dining.c
 OBJS = $(SRCS:.c=.o)
 

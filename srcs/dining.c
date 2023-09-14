@@ -31,7 +31,6 @@ void	eat_sleep_think(t_philo *p, t_info *info)
 	print_state(info, p, "is sleeping");
 	take_time(p->last_eat, info->args[2] + info->args[3]);
 	print_state(info, p, "is thinking");
-	usleep(info->args[1] * 200);
 }
 
 int	pick_fork(t_philo *p, t_info *info)
@@ -52,33 +51,45 @@ int	pick_fork(t_philo *p, t_info *info)
 	return (0);
 }
 
-int	is_fin(t_info *info)
-{
-	int	result;
-
-	result = 0;
-	pthread_mutex_lock(&info->fin_mutex);
-	if (info->fin == info->args[0])
-		result = 1;
-	pthread_mutex_unlock(&info->fin_mutex);
-	return (result);
-}
-
-void	*dining(void *arg)
+void	*simulation(void *arg)
 {
 	t_philo	*p;
+	int		finish;
 
 	p = (t_philo *)arg;
 	gettimeofday(&p->last_eat, NULL);
 	if (p->idx % 2 == 0)
 		usleep(500 * p->info->args[2]);
-	while (1)
+	finish = 0;
+	while (!finish)
 	{
 		if (pick_fork(p, p->info) < 0)
 			return (NULL);
 		eat_sleep_think(p, p->info);
-		if (is_fin(p->info))
-			return (NULL);
+		pthread_mutex_lock(&p->info->fin_mutex);
+		if (p->info->fin == p->info->args[0])
+			finish = 1;
+		pthread_mutex_unlock(&p->info->fin_mutex);
 	}
 	return (NULL);
+}
+
+void	dining(t_info *info, t_malloc *m)
+{
+	int			i;
+
+	i = info->args[0];
+	gettimeofday(&info->start_time, NULL);
+	while (i-- > 0)
+	{
+		m->philosophers[i].idx = i;
+		m->philosophers[i].next_idx = (i + 1) % info->args[0];
+		m->philosophers[i].eat_cnt = 0;
+		m->philosophers[i].info = info;
+		pthread_create(&m->threads[i], NULL, simulation, &m->philosophers[i]);
+	}
+	i = info->args[0];
+	while (i-- > 0)
+		pthread_join(m->threads[i], NULL);
+	clear(info, m);
 }
