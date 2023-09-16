@@ -1,36 +1,67 @@
 #include "philosophers.h"
 
-void	take_time(struct timeval start_time, int time)
+int	take_time(struct timeval start_time, int spend_time, t_info *info)
 {
+	int time;
 	int	remain;
-
-	while (1)
+	
+	time = get_time(start_time);
+	while (time < spend_time)
 	{
-		remain = time - get_time(start_time);
+		if (info->args[1] < spend_time)
+			remain = info->args[1] - time;
+		else
+			remain = spend_time - time;
 		if (remain <= 0)
-			return ;
+			remain = 1;
 		usleep(remain * 200);
+		pthread_mutex_lock(&info->fin_mutex);
+		if (info->fin == info->args[0])
+		{
+			pthread_mutex_unlock(&info->fin_mutex);
+			return (-1);
+		}
+		pthread_mutex_unlock(&info->fin_mutex);
+		time = get_time(start_time);
 	}
+	return (0);
 }
 
-void	eat_sleep_think(t_philo *p, t_info *info)
+int	eat(t_philo *p, t_info *info)
 {
+	int result;
+
+	pthread_mutex_lock(&p->eat_mutex);
 	gettimeofday(&p->last_eat, NULL);
-	print_state(info, p, "is eating");
-	p->eat_cnt++;
-	if (p->eat_cnt == info->args[4])
+	p->eating = 1;
+	pthread_mutex_unlock(&p->eat_mutex);
+	result = print_state(info, p, "is eating");
+	if (++(p->eat_cnt) == info->args[4])
 	{
 		pthread_mutex_lock(&info->fin_mutex);
 		if (info->fin < info->args[0])
 			info->fin++;
 		pthread_mutex_unlock(&info->fin_mutex);
 	}
-	take_time(p->last_eat, info->args[2]);
+	if (!result)
+		result = take_time(p->last_eat, info->args[2], info);
 	pthread_mutex_unlock(&info->fork[p->next_idx]);
 	pthread_mutex_unlock(&info->fork[p->idx]);
-	print_state(info, p, "is sleeping");
-	take_time(p->last_eat, info->args[2] + info->args[3]);
-	print_state(info, p, "is thinking");
+	pthread_mutex_lock(&p->eat_mutex);
+	p->eating = 0;
+	pthread_mutex_unlock(&p->eat_mutex);
+	return (result);
+}
+
+int	sleep_and_think(t_philo *p, t_info *info)
+{
+	if (print_state(info, p, "is sleeping") < 0)
+		return (-1);
+	if (take_time(p->last_eat, info->args[2] + info->args[3], info) < 0)
+		return (-1);
+	if (print_state(info, p, "is thinking") < 0)
+		return (-1);
+	return (0);
 }
 
 int	pick_fork(t_philo *p, t_info *info)
@@ -51,45 +82,22 @@ int	pick_fork(t_philo *p, t_info *info)
 	return (0);
 }
 
-void	*simulation(void *arg)
+void	*dining(void *arg)
 {
 	t_philo	*p;
-	int		finish;
 
 	p = (t_philo *)arg;
 	gettimeofday(&p->last_eat, NULL);
-	if (p->idx % 2 == 0)
-		usleep(500 * p->info->args[2]);
-	finish = 0;
-	while (!finish)
+	if (p->idx % 2 == 1)
+		usleep(250 * p->info->args[1]);
+	while (1)
 	{
 		if (pick_fork(p, p->info) < 0)
 			return (NULL);
-		eat_sleep_think(p, p->info);
-		pthread_mutex_lock(&p->info->fin_mutex);
-		if (p->info->fin == p->info->args[0])
-			finish = 1;
-		pthread_mutex_unlock(&p->info->fin_mutex);
+		if (eat(p, p->info) < 0)
+			return (NULL);
+		if (sleep_and_think(p, p->info) < 0)
+			return (NULL);
 	}
 	return (NULL);
-}
-
-void	dining(t_info *info, t_malloc *m)
-{
-	int			i;
-
-	i = info->args[0];
-	gettimeofday(&info->start_time, NULL);
-	while (i-- > 0)
-	{
-		m->philosophers[i].idx = i;
-		m->philosophers[i].next_idx = (i + 1) % info->args[0];
-		m->philosophers[i].eat_cnt = 0;
-		m->philosophers[i].info = info;
-		pthread_create(&m->threads[i], NULL, simulation, &m->philosophers[i]);
-	}
-	i = info->args[0];
-	while (i-- > 0)
-		pthread_join(m->threads[i], NULL);
-	clear(info, m);
 }

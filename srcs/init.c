@@ -1,27 +1,23 @@
 #include "philosophers.h"
 
-static size_t	_strlen(char *str)
+static int invalid_arg_err(char *str)
 {
 	size_t	len;
 
 	len = 0;
 	while (str && str[len])
 		len++;
-	return (len);
-}
-
-static int invalid_arg_err(char *str)
-{
-	write(STDERR_FILENO, "error: ", 7); 
-	write(STDERR_FILENO, str, _strlen(str));
-	write(STDERR_FILENO, ": is invalid argument\n", 22);
+	write(STDERR_FILENO, "error: \'", 8);
+	if (str)
+		write(STDERR_FILENO, str, len);
+	write(STDERR_FILENO, "\' is invalid argument\n", 22);
 	return (-1);
 }
 
 static int	_atoi(char *str)
 {
-	long long	num;
-	size_t		i;
+	size_t	num;
+	size_t	i;
 
 	if (!str)
 		return (0);
@@ -57,7 +53,24 @@ static int	malloc_err(t_info *info, t_malloc *m)
 	return (-1);
 }
 
-int	init(char **av, t_info *info, t_malloc *m)
+void	init(t_info *info, t_philo *philo)
+{
+	int i;
+
+	i = info->args[0];
+	while (i-- > 0)
+	{
+		pthread_mutex_init(&info->fork[i], NULL);
+		philo[i].idx = i;
+		philo[i].next_idx = (i + 1) % info->args[0];
+		philo[i].eat_cnt = 0;
+		philo[i].eating = 0;
+		philo[i].info = info;
+		pthread_mutex_init(&philo[i].eat_mutex, NULL);
+	}
+}
+
+int	malloc_and_init(char **av, t_info *info, t_malloc *m)
 {
 	int	i;
 
@@ -73,10 +86,9 @@ int	init(char **av, t_info *info, t_malloc *m)
 	m->philosophers = malloc(sizeof(t_philo) * info->args[0]);
 	if (!info->fork || !m->threads || !m->philosophers)
 		return(malloc_err(info, m));
-	i = info->args[0];
-	while (i-- > 0)
-		pthread_mutex_init(&info->fork[i], NULL);
+	init(info, m->philosophers);
 	info->fin = 0;
 	pthread_mutex_init(&info->fin_mutex, NULL);
+	gettimeofday(&info->start_time, NULL);
 	return (0);
 }

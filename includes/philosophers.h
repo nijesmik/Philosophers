@@ -29,6 +29,8 @@ typedef struct s_philosopher
 	int				next_idx;
 	int				eat_cnt;
 	t_info			*info;
+	pthread_mutex_t	eat_mutex;
+	char			eating;
 	struct timeval	last_eat;
 }	t_philo;
 
@@ -39,14 +41,13 @@ typedef struct s_malloc
 }	t_malloc;
 
 /* init.c */
-int		init(char **av, t_info *info, t_malloc *m);
+int		malloc_and_init(char **av, t_info *info, t_malloc *m);
 
 /* dining.c */
-void	dining(t_info *info, t_malloc *m);
+void	*dining(void *arg);
 
-/* util.c */
+/* util (main.c) */
 int		get_time(struct timeval start_time);
 int		print_state(t_info *info, t_philo *p, char *str);
-void	clear(t_info *info, t_malloc *m);
 
 #endif

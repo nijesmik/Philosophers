@@ -1,17 +1,96 @@
 #include "philosophers.h"
 
+int	get_time(struct timeval start_time)
+{
+	struct timeval	cur_time;
+	int				time;
+
+	gettimeofday(&cur_time, NULL);
+	time = (int)(cur_time.tv_sec - start_time.tv_sec) * 1000 \
+			+ (cur_time.tv_usec - start_time.tv_usec) / 1000;
+	return (time);
+}
+
+int	print_state(t_info *info, t_philo *p, char *str)
+{
+	char	*msg;
+	int		result;
+
+	result = -1;
+	pthread_mutex_lock(&p->info->fin_mutex);
+	if (info->fin < info->args[0])
+	{
+		result = 0;
+		msg = str;
+		if (!str)
+		{
+			msg = "died";
+			info->fin = info->args[0];
+		}
+		printf("%d %d %s\n", get_time(info->start_time), p->idx + 1, msg);
+	}
+	pthread_mutex_unlock(&p->info->fin_mutex);
+	return (result);
+}
+
+void	clear(t_info *info, t_malloc *m)
+{
+	int	i;
+
+	i = info->args[0];
+	while (i-- > 0)
+	{
+		pthread_mutex_destroy(&info->fork[i]);
+		pthread_mutex_destroy(&m->philosophers[i].eat_mutex);
+	}
+	pthread_mutex_destroy(&info->fin_mutex);
+	free(info->fork);
+	free(m->threads);
+	free(m->philosophers);
+}
+
+void	monitoring(t_philo *p, t_info *info)
+{
+	int finish;
+	int	i;
+
+	finish = 0;
+	i = 0;
+	while (!finish)
+	{
+		i = i % info->args[0];
+		pthread_mutex_lock(&p[i].eat_mutex);
+		if (!p[i].eating && get_time(p[i].last_eat) >= info->args[1])
+		{
+			print_state(info, &p[i], NULL);
+			finish = 1;
+			if (info->args[0] == 1)
+				pthread_mutex_unlock(&info->fork[0]);	
+		}
+		pthread_mutex_unlock(&p[i].eat_mutex);
+		i++;
+	}
+}
+
 int	main(int ac, char **av)
 {
 	t_info		info;
 	t_malloc	m;
+	int			i;
 
 	if (ac < 5 || ac > 7)
 	{
 		write(2, "error : invalid number of arguments\n", 36);
 		return (EXIT_FAILURE);
 	}
-	if (init(av, &info, &m) < 0)
+	if (malloc_and_init(av, &info, &m) < 0)
 		return (EXIT_FAILURE);
-	dining(&info, &m);
+	i = -1;
+	while (++i < info.args[0])
+		pthread_create(&m.threads[i], NULL, dining, &m.philosophers[i]);
+	monitoring(m.philosophers, &info);
+	while (i-- > 0)
+		pthread_join(m.threads[i], NULL);
+	clear(&info, &m);
 	return (EXIT_SUCCESS);
 }
