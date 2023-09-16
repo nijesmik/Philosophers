@@ -49,25 +49,27 @@ void	clear(t_info *info, t_malloc *m)
 	free(m->philosophers);
 }
 
-void	monitoring(t_philo *p, t_info *info)
+void	monitoring(t_philo *philosophers, t_info *info)
 {
 	int finish;
 	int	i;
+	t_philo	*p;
 
 	finish = 0;
 	i = 0;
 	while (!finish)
 	{
 		i = i % info->args[0];
-		pthread_mutex_lock(&p[i].eat_mutex);
-		if (!p[i].eating && get_time(p[i].last_eat) >= info->args[1])
+		p = &philosophers[i];
+		pthread_mutex_lock(&p->eat_mutex);
+		if (!p->eating && get_time(p->last_eat) > info->args[1])
 		{
-			print_state(info, &p[i], NULL);
+			print_state(info, p, NULL);
 			finish = 1;
 			if (info->args[0] == 1)
 				pthread_mutex_unlock(&info->fork[0]);	
 		}
-		pthread_mutex_unlock(&p[i].eat_mutex);
+		pthread_mutex_unlock(&p->eat_mutex);
 		i++;
 	}
 }
@@ -80,7 +82,7 @@ int	main(int ac, char **av)
 
 	if (ac < 5 || ac > 7)
 	{
-		write(2, "error : invalid number of arguments\n", 36);
+		write(STDERR_FILENO, "error : invalid number of arguments\n", 36);
 		return (EXIT_FAILURE);
 	}
 	if (malloc_and_init(av, &info, &m) < 0)

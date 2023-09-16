@@ -53,7 +53,7 @@ static int	malloc_err(t_info *info, t_malloc *m)
 	return (-1);
 }
 
-void	init(t_info *info, t_philo *philo)
+void	init(t_info *info, t_philo *philosophers)
 {
 	int i;
 
@@ -61,12 +61,12 @@ void	init(t_info *info, t_philo *philo)
 	while (i-- > 0)
 	{
 		pthread_mutex_init(&info->fork[i], NULL);
-		philo[i].idx = i;
-		philo[i].next_idx = (i + 1) % info->args[0];
-		philo[i].eat_cnt = 0;
-		philo[i].eating = 0;
-		philo[i].info = info;
-		pthread_mutex_init(&philo[i].eat_mutex, NULL);
+		philosophers[i].idx = i;
+		philosophers[i].next_idx = (i + 1) % info->args[0];
+		philosophers[i].eat_cnt = 0;
+		philosophers[i].eating = 0;
+		philosophers[i].info = info;
+		pthread_mutex_init(&philosophers[i].eat_mutex, NULL);
 	}
 }
 
