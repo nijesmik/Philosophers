@@ -11,7 +11,7 @@ int
 gettimeofday(struct timeval *restrict tp, void *restrict tzp);
 ```
 
-The system's notion of the current Greenwich time and the current time zone is obtained with the gettimeofday() call, and set with the settimeofday() call.
+The system's notion of the current Greenwich time and the current time zone is obtained with the `gettimeofday()` call.
 The time is expressed in seconds and microseconds since midnight (0 hour), January 1, 1970.
 The resolution of the system clock is hardware dependent, and the time may be updated continuously or in "ticks".
 
