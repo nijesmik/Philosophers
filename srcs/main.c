@@ -57,6 +57,7 @@ void	monitoring(t_philo *philosophers, t_info *info)
 
 	finish = 0;
 	i = 0;
+	usleep(500 * p->info->args[1]);
 	while (!finish)
 	{
 		i = i % info->args[0];
