@@ -1,5 +1,13 @@
 # Philosophers
 
+## 목차
+
+- 전체 실행 과정
+- 각 단계별 주요 실행 과정
+    1. Initialize structures
+    2. Philosophers dining
+    3. Monitor philosophers
+
 ## 전체 실행 과정
 
 ### 프로세스 개요
@@ -10,10 +18,13 @@ graph TD
     B -->|Invalid| C[Print error and exit]
     B -->|Valid| D[Initialize structures]
     D --> E[Create philosopher threads]
-    E --> F[Monitor philosophers]
+    E -->|main thread| F[Monitor philosophers]
     F --> G[Join philosopher threads]
     G --> H[Clear resources]
     H --> I[Exit]
+	E -->|philosopher threads| J[Philosophers dining]
+	J -->|Finished eating or died| G
+	F -.->|Monitoring| J
 ```
 
 ### 구현: `main()`
@@ -35,7 +46,7 @@ int	main(int ac, char **av)
 		return (EXIT_FAILURE);
 	i = -1;
 
-    // 2. Create philosopher threads
+    // 2. Create philosopher threads & Philosophers dining
 	while (++i < info.args[0])
 		pthread_create(&m.threads[i], NULL, dining, &m.philosophers[i]);
 
@@ -52,9 +63,7 @@ int	main(int ac, char **av)
 }
 ```
 
-## 각 단계별 주요 실행 과정
-
-## 1. Initialize structures: 구조체 초기화
+## 1. Initialize structures
 
 ### 프로세스 개요
 
@@ -102,7 +111,7 @@ int	malloc_and_init(char **av, t_info *info, t_malloc *m)
 }
 ```
 
-## 2.
+## 2. Philosophers dining
 
 ### 프로세스 개요
 
@@ -114,12 +123,15 @@ graph TD
     C -->|No| E[Start dining loop]
     D --> E
     E --> F[Pick forks]
-    F -->|Failure| G[Exit]
+    F -.->|Failure| G[Die]
+	G --> M[Exit]
     F -->|Success| H[Eat]
-    H -->|Failure| G
-    H -->|Success| I[Sleep and think]
-    I -->|Failure| G
-    I -->|Success| E
+    H --> I[Sleep]
+	I -.->|Starving| G
+    I --> L[Think]
+    L --> F
+    L -.->|Starving| G
+
 ```
 
 ### 구현: `dining()`
@@ -159,7 +171,7 @@ void	*dining(void *arg)
 ```mermaid
 graph TD
     A[Start] --> B[Initialize variables]
-    B --> C[Sleep for a while]
+    B --> C[Wait for philosopher threads to start]
     C --> D[Start monitoring loop]
     D --> E[Check philosopher state]
     E -->|Died| F[Print state and exit]
@@ -176,15 +188,19 @@ void	monitoring(t_philo *philosophers, t_info *info)
 	int	i;
 	t_philo	*p;
 
-	// 1. Initialize variables &
+	// 1. Initialize variables & Wait for philosopher threads to start
 	finish = 0;
 	i = 0;
 	usleep(500 * p->info->args[1]); 
+
+	// 2. Start monitoring loop
 	while (!finish)
 	{
 		i = i % info->args[0];
 		p = &philosophers[i];
 		pthread_mutex_lock(&p->eat_mutex);
+
+		// 3. Check philosopher state
 		if (!p->eating && get_time(p->last_eat) > info->args[1])
 		{
 			print_state(info, p, NULL);
